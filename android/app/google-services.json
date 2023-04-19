@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "473449818514",
+    "project_id": "miss-c6d58",
+    "storage_bucket": "miss-c6d58.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:473449818514:android:4094670a910c3ca7cc394b",
+        "android_client_info": {
+          "package_name": "com.example.miss"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "473449818514-51js9dj62d78eg5pa9fe981fd94vst9g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyACFDjtYX_O3z1gDeHdU4OiRGRfyrEtHVY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "473449818514-51js9dj62d78eg5pa9fe981fd94vst9g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
