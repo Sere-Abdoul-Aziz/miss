@@ -15,6 +15,7 @@ class CommentaireWidget extends StatefulWidget {
 class _CommentaireWidgetState extends State<CommentaireWidget> {
   final TextEditingController _textEditingController = TextEditingController();
   late CollectionReference _commentCollection;
+  late CollectionReference _actuPhotoCollection;
   List<DocumentSnapshot> _commentList = [];
   @override
   void initState() {
@@ -23,16 +24,9 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
         .collection('actu_photo')
         .doc(widget.photoId)
         .collection('commentaires');
-    //_loadComments();
+    _actuPhotoCollection = FirebaseFirestore.instance.collection('actu_photo');
   }
 
-  // Future<void> _loadComments() async {
-  //   QuerySnapshot querySnapshot =
-  //       await _commentCollection.orderBy('date', descending: true).get();
-  //   setState(() {
-  //     _commentList = querySnapshot.docs;
-  //   });
-  // }
   Stream<QuerySnapshot> _getCommentStream() {
     return _commentCollection.orderBy('date', descending: true).snapshots();
   }
@@ -42,8 +36,17 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
       'commentaire': newComment,
       'date': DateTime.now(),
     });
+    await _updateCommentCount();
     _textEditingController.clear();
     //_loadComments();
+  }
+
+  Future<void> _updateCommentCount() async {
+    final doc = await _actuPhotoCollection.doc(widget.photoId).get();
+    int currentCount = doc['comment'] ?? 0;
+    await _actuPhotoCollection
+        .doc(widget.photoId)
+        .update({'comment': currentCount + 1});
   }
 
   Widget _buildCommentListItem(DocumentSnapshot commentSnapshot) {
@@ -86,10 +89,10 @@ class _CommentaireWidgetState extends State<CommentaireWidget> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blueAccent,
         title: Text('Commentaires'),
       ),
       body: Column(

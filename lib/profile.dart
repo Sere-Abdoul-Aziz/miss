@@ -1,42 +1,108 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:firebase_core/firebase_core.dart';
-//import 'package:sms_advanced/sms_advanced.dart';
 
-import 'main.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+class Presentation extends StatefulWidget {
+  final String nom;
+  final String des;
+  Presentation({required this.nom, required this.des});
+  @override
+  _PresentationState createState() => _PresentationState();
+}
+
+class _PresentationState extends State<Presentation> {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '${widget.nom}',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
+          SizedBox(height: 10),
+          Text(
+            '${widget.des}',
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class Profile extends StatefulWidget {
   final String imagePath;
   final String nom;
   final String num;
   final String pp;
+  final String id;
+  final String img;
+  final String mess;
+  final String des;
 
-  const Profile(
-      {Key? key,
-      required this.imagePath,
-      required this.nom,
-      required this.num,
-      required this.pp})
-      : super(key: key);
+  const Profile({
+    Key? key,
+    required this.imagePath,
+    required this.nom,
+    required this.num,
+    required this.pp,
+    required this.id,
+    required this.img,
+    required this.mess,
+    required this.des,
+  }) : super(key: key);
   @override
   _ProfileState createState() => _ProfileState();
 }
 
 class _ProfileState extends State<Profile> {
   late Stream<DocumentSnapshot<Map<String, dynamic>>> missStream;
+
+  //late Stream<QuerySnapshot<Map<String, dynamic>>> photosStream;
+
   String? num;
   String? pp;
+  String? id;
+  String? img;
+  String? mess;
+  String? des;
+
   //SmsQuery query = new SmsQuery();
+
   @override
   void initState() {
     super.initState();
+
+    num = widget.num;
+    pp = widget.pp;
+    id = widget.id;
+    img = widget.img;
+    mess = widget.mess;
+    des = widget.des;
+
+    // Initialiser missStream avec le stream approprié
     missStream = FirebaseFirestore.instance
         .collection('miss')
         .doc(widget.nom)
         .snapshots();
-    num = widget.num;
-    pp = widget.pp;
+
+    // Récupérer la sous-collection "photos" et les stocker dans la liste `imageUrlList`
+    // Récupérer la sous-collection "photos" de la collection "miss"
+    // photosStream = FirebaseFirestore.instance
+    //     .collection('miss')
+    //     .doc(widget.nom)
+    //     .collection('photos')
+    //     .snapshots();
   }
 
   Future<void> _showVoteDialog() async {
@@ -65,7 +131,7 @@ class _ProfileState extends State<Profile> {
               onPressed: () {
                 // Envoyer un message "vote" au numéro de téléphone 1101
                 Navigator.of(context).pop();
-                _sendMessage("${widget.num}", "+21651333508");
+                _sendMessage("${widget.num}", "${widget.mess}");
               },
             ),
           ],
@@ -75,21 +141,14 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> _sendMessage(String message, String phoneNumber) async {
-//SmsSender sender = new SmsSender();
-//String address = phoneNumber;
-
-//sender.sendSms(new SmsMessage(address, message));
-    //List<String> recipents = [phoneNumber];
-    //await sendSMS(message: message, recipients: recipents);
-    // String _result =
-    //     await sendSMS(message: message, recipients: recipents, sendDirect: true)
-    //         .catchError((onError) {
-    //   print(onError);
-    // });
-    //print(_result);
-    // Ici, vous pouvez utiliser la méthode de votre choix pour envoyer un message
-    // au numéro de téléphone spécifié.
-    // Par exemple, vous pouvez utiliser l'API SMS, un plugin Flutter, etc.
+    final Uri launchUri = Uri(
+      scheme: 'sms',
+      path: phoneNumber,
+      queryParameters: {
+        'body': message,
+      },
+    );
+    await launchUrl(launchUri);
   }
 
   @override
@@ -104,6 +163,10 @@ class _ProfileState extends State<Profile> {
           }
 
           return Scaffold(
+            // appBar: AppBar(
+            //   backgroundColor: Color.fromARGB(232, 255, 95, 2),
+            //   title: Text('Profile'),
+            // ),
             body: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,8 +183,8 @@ class _ProfileState extends State<Profile> {
                         ),
                       ),
                       Positioned(
-                        top: 40,
-                        left: 20,
+                        top: MediaQuery.of(context).size.height * 0.1,
+                        left: MediaQuery.of(context).size.width * 0.1,
                         child: Container(
                           width: MediaQuery.of(context).size.width * 0.2,
                           height: MediaQuery.of(context).size.height * 0.1,
@@ -152,7 +215,7 @@ class _ProfileState extends State<Profile> {
                       ),
                       Positioned(
                         bottom: 20,
-                        left: 120,
+                        left: 230,
                         child: Column(
                           children: [
                             Container(
@@ -160,10 +223,19 @@ class _ProfileState extends State<Profile> {
                                 borderRadius: BorderRadius.circular(30.0),
                                 gradient: const LinearGradient(
                                   colors: <Color>[
-                                    Color(0xFF8C78F7),
-                                    Color(0xFFA3B0FB),
+                                    Color(0xFFFFDEE8),
+                                    Color(0xFFFFB3C3),
                                   ],
                                 ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.pinkAccent.withOpacity(0.8),
+                                    spreadRadius: 2,
+                                    blurRadius: 5,
+                                    offset: Offset(
+                                        0, 3), // changes position of shadow
+                                  ),
+                                ],
                               ),
                               child: MaterialButton(
                                 minWidth: 100.0,
@@ -176,7 +248,7 @@ class _ProfileState extends State<Profile> {
                                   'Voter',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 16.0,
+                                    fontSize: 18.0,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -205,108 +277,99 @@ class _ProfileState extends State<Profile> {
                           ),
                         ],
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${widget.nom}',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: Presentation(
+                          nom: '${widget.nom}', des: '${widget.des}'),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 1,
+                          blurRadius: 5,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
                     ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 1,
-                            blurRadius: 5,
-                            offset: Offset(0, 3),
+                    child: Column(
+                      // mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 50,
+                            vertical: 10,
                           ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            height: 200,
+                          child: Container(
+                            height: MediaQuery.of(context).size.height * 0.5,
+                            width: MediaQuery.of(context).size.width * 0.8,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(100),
+                              border: Border.all(
+                                width: 10,
+                                color: Colors.white,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.pink.withOpacity(0.5),
+                                  blurRadius: 5,
+                                  spreadRadius: 2,
+                                ),
+                              ],
                               image: DecorationImage(
-                                image: AssetImage('assets/images/two.jpg'),
+                                image: NetworkImage(widget.img),
                                 fit: BoxFit.cover,
                               ),
                             ),
                           ),
-                          SizedBox(height: 10),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 10,
-                            ),
-                            child: Text(
-                              'Titre de la vidéo',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 10,
-                    ),
-                    child: GridView.count(
-                      shrinkWrap: true,
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      children: List.generate(
-                        9,
-                        (index) => Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            image: DecorationImage(
-                              image: AssetImage('assets/images/one.jpg'),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
+                  // Container(
+                  //   padding: EdgeInsets.all(8.0),
+                  //   child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+                  //     stream: photosStream,
+                  //     builder: (context, snapshot) {
+                  //       if (snapshot.connectionState ==
+                  //           ConnectionState.waiting) {
+                  //         return Center(child: CircularProgressIndicator());
+                  //       } else if (snapshot.hasData &&
+                  //           snapshot.data!.docs.isNotEmpty) {
+                  //         final photos = snapshot.data!.docs;
+                  //         return Container(
+                  //           height: MediaQuery.of(context).size.height * 0.5,
+                  //           child: GridView.count(
+                  //             shrinkWrap: true,
+                  //             physics: NeverScrollableScrollPhysics(),
+                  //             crossAxisCount: 2,
+                  //             childAspectRatio: 3 / 2,
+                  //             crossAxisSpacing: 10,
+                  //             mainAxisSpacing: 10,
+                  //             children: photos.map((photo) {
+                  //               return GridTile(
+                  //                 child: Image.network(
+                  //                   photo['photo'],
+                  //                   fit: BoxFit.cover,
+                  //                 ),
+                  //               );
+                  //             }).toList(),
+                  //           ),
+                  //         );
+                  //       } else if (snapshot.hasError) {
+                  //         return Center(child: Text("Une erreur est survenue"));
+                  //       } else {
+                  //         return Center(child: Text("Aucune photo trouvée"));
+                  //       }
+                  //     },
+                  //   ),
+                  // )
                 ],
               ),
             ),
-            //bottomNavigationBar: MonBottomNavigationBar(selectedIndex: _selectedIndex,),
           );
         });
   }

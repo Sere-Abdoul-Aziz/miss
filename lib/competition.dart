@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'Actualites.dart';
+import 'home.dart';
 import 'main.dart';
+
+Future<void> _launchUrl(String url) async {
+  if (!await launchUrl(
+    Uri.parse(url),
+  )) {
+    throw Exception('Could not launch $url');
+  }
+}
 
 class Moov extends StatelessWidget {
   @override
@@ -81,16 +91,21 @@ class Moov extends StatelessWidget {
 class Compet {
   final String title;
   final String image;
-  Compet({required this.title, required this.image});
+  final String url;
+  Compet({required this.title, required this.image, required this.url});
 }
 
 class CompetitionPage extends StatelessWidget {
   final firestoreInstance = FirebaseFirestore.instance;
+  final Key? key;
+
+  CompetitionPage({this.key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Color.fromARGB(255, 255, 255, 255),
-        body: Column(children: [
+        body: SafeArea(
+            child: Column(children: [
           Padding(padding: const EdgeInsets.all(20.0)),
           Moov(),
           Expanded(
@@ -102,15 +117,14 @@ class CompetitionPage extends StatelessWidget {
                     child: CircularProgressIndicator(),
                   );
                 }
-
                 return ListView.builder(
                   itemCount: snapshot.data.docs.length,
                   itemBuilder: (BuildContext context, int index) {
                     DocumentSnapshot competition = snapshot.data.docs[index];
                     Compet compet = Compet(
                         title: competition['titre'],
-                        image: ('assets/images/one.jpg'));
-
+                        image: competition['image'],
+                        url: competition['url']); // Change to 'image' field
                     return Container(
                       width: MediaQuery.of(context).size.width,
                       margin: EdgeInsets.symmetric(
@@ -127,60 +141,79 @@ class CompetitionPage extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.3,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              flex: 1,
-                              child: Container(
-                                width: MediaQuery.of(context).size.width,
-                                height: 50.0,
-                                padding: EdgeInsets.all(10.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue,
-                                  borderRadius: BorderRadius.only(
-                                    topLeft: Radius.circular(10.0),
-                                    topRight: Radius.circular(10.0),
+                      child: Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              _launchUrl(compet.url);
+                            },
+                            child: SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.3,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 1,
+                                    child: Container(
+                                      width: MediaQuery.of(context).size.width,
+                                      height: 50.0,
+                                      padding: EdgeInsets.all(10.0),
+                                      decoration: BoxDecoration(
+                                        color: Color.fromRGBO(0, 102, 178, 10),
+                                        borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(10.0),
+                                          topRight: Radius.circular(10.0),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        compet.title,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18.0,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                  // borderRadius: BorderRadius.circular(5.0),
-                                ),
-                                child: Text(
-                                  compet.title,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18.0,
-                                    color: Colors.white,
+                                  Expanded(
+                                    flex: 4,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.only(
+                                        bottomLeft: Radius.circular(10.0),
+                                        bottomRight: Radius.circular(10.0),
+                                      ),
+                                      child: Image.network(
+                                        compet.image,
+                                        width: double.infinity,
+                                        height: 200.0,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
                             ),
-                            Expanded(
-                              flex: 4,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.only(
-                                  bottomLeft: Radius.circular(10.0),
-                                  bottomRight: Radius.circular(10.0),
-                                ),
-                                child: Image.asset(
-                                  compet.image,
-                                  width: double.infinity,
-                                  height: 200.0,
-                                  fit: BoxFit.cover,
-                                ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              _launchUrl(compet.url);
+                            },
+                            child: Text(
+                              'Visiter le site de Moov Africa',
+                              style: TextStyle(
+                                color: Color.fromARGB(1000, 242, 111, 33),
+                                fontSize: 16,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     );
                   },
                 );
               },
             ),
-          ),
-          MonBottomNavigationBar()
-        ]));
+          )
+        ])));
   }
 }
