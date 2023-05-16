@@ -1,13 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.miss">
-     <uses-permission android:name="android.permission.SEND_SMS"/>
+    package="com.jofedigital.com">
+    
      <uses-permission android:name="android.permission.INTERNET"/>
-     <queries>
-        <intent>
-            <action android:name="android.intent.action.SENDTO" />
-            <data android:scheme="smsto" />
-        </intent>
-    </queries>
+     
     <!-- <service
     android:name=".java.MyFirebaseMessagingService"
     android:exported="false">
@@ -17,7 +12,7 @@
 </service> -->
     
    <application
-        android:label="miss"
+        android:label="MissUniversités"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
